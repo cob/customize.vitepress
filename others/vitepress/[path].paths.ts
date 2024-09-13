@@ -75,7 +75,7 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
     const under : Page[] = page.content!.L1s.flatMap( c => flatten(c)).map( 
                 c => ({ params: { 
                             files: c.filepaths,
-                            vars: page.params![c.localeCode],
+                            vars: page.params![c.localeCode == localeData.defaultLocale.code ? "root" : c.localeCode],
                             path: prefixOf(c.localeCode) +  c.path,
                             layout: page.content!.layout,
                             restrictions: c.restrictions,
