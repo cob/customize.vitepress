@@ -1,4 +1,5 @@
 export interface TextualContent {
+    filepaths: string[],
     instance: number,
     path: string,
     localeCode: string

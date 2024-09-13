@@ -24,7 +24,7 @@ import { LocaleData } from "./.vitepress/theme/schema/site"
 interface PageParams {
     layout?: string,
     public?: boolean,
-    instance?: number,
+    instance?: number | string,
 
     vars?: Locale
     content?: ContentTree
@@ -72,8 +72,9 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
         return mains
  
 
-    const under : Page[] = page.content!.L1s.flatMap( c => flatten(c).map( 
+    const under : Page[] = page.content!.L1s.flatMap( c => flatten(c)).map( 
                 c => ({ params: { 
+                            files: c.filepaths,
                             vars: page.params![c.localeCode],
                             path: prefixOf(c.localeCode) +  c.path,
                             layout: page.content!.layout,
@@ -81,7 +82,7 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
                             instance: c.instance
                         },
                         content: removeHTMLTags(c.content)
-                      })) )
+                      })) 
 
     
     const all = under.concat(mains)
