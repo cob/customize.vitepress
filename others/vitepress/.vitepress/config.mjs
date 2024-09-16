@@ -41,6 +41,7 @@ site.pages.forEach( p => {
     p.content.L1s.forEach( buildIndexTree )
 })
 
+const params = site.pages.reduce( (paramObj, page) => {paramObj[page.path] = page.params ; return paramObj}, {})
 const base = tag == "" ? undefined : `/${tag}/`
 
 const baseConfig = {
@@ -49,6 +50,7 @@ const baseConfig = {
   ignoreDeadLinks: true,
   locales: locales,
   themeConfig: {
+    pageParams: params,
     navLayout: site.navbarLayout,
     footerLayout: site.footerLayout,
     i18nRouting: true,
