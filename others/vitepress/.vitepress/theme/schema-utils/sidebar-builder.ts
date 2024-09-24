@@ -8,33 +8,22 @@ export function buildSidebar( pages: SitePage[],  localeCode : string, prefixOf 
 
     const sidebar : Sidebar = {}
 
-    for(const page of pages ){
-        if( !page.content ) 
+    for(const page of pages ) {
+        if(!page.content)
             continue
         
-        const topBar = {
-            items: page.content.L1s
-                .filter( l1 => l1.current.locales.some( p => p.localeCode == localeCode ))
-                .map( l1 => ({ 
-                    restrictions: l1.current.locales[0].restrictions,
-                    link: prefixOf + noIndex(l1.path),
-                    text: l1.current.locales.find( p => p.localeCode == localeCode )!.title, // we filtered for l1s with that have the locale, so it will never be undefined
-            }))}
-        
-        for(const l1 of page.content.L1s){
-            const s : any[] = [topBar]
-            const secondBar : SidebarItem[] = []
-            for(const c of l1.children ?? [])
-                secondBar.push(
-                        levelToSidebar(c, localeCode , prefixOf)
-                    )
-            s.push({ items: secondBar })
-            
-            sidebar[prefixOf + noIndex(l1.path)] = s
-        }
+        const top =prefixOf + noIndex(page.path)      
+        sidebar[top] = []  
+        const localeL1s = page.content.L1s.filter( l1 => l1.current.locales.some( p => p.localeCode == localeCode )) 
 
-        // sidebar['/'  + parentURL + '/' ] = page.content.L1s.map( l1 => levelToSidebar(l1, undefined, "") )
-    
+
+        for(const l1 of localeL1s) {
+            sidebar[top].push(
+                {
+                    text: l1.current.locales.find( p => p.localeCode == localeCode )!.title,
+                    link: prefixOf + noIndex(l1.path), restrictions: [], items: l1.children?.map( c => levelToSidebar(c, localeCode, prefixOf) )})
+        }
+            
     }
 
     return sidebar
@@ -42,10 +31,6 @@ export function buildSidebar( pages: SitePage[],  localeCode : string, prefixOf 
 
 const noIndex = (path : string) => 
     path.replace("index", "")
-
-// First sidebar of each top level points to the L1s
-
-
 
 // TODO check where undefined = root
 function levelToSidebar( level : ContentNode, locale: string | undefined, prefixOf : string) : SidebarItem {
