@@ -115,12 +115,17 @@ async function contentsOf(id: number, path: string, tag: string): Promise<Conten
         const common = {
             instance: instance.id, 
             path: path, 
+            filepaths: instance.fields("File").map( f => buildPathLink(f, id) ),
             restrictions: instance.field("Visibility")?.values("Audience Group") ?? [],
         } 
         return { 
             instanceId : instance.id,
             locales: availableContent(instance, tag, common)
     }})
+}
+
+function buildPathLink(field: RmInstanceField, id: number) {
+    return `/recordm/recordm/instances/${id}/files/${field.fieldDefinition.id}/${field.value()}`
 }
 
 function availableContent(instance: RmInstance, tag : string, common) {
