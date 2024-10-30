@@ -1,13 +1,15 @@
 import { defineConfig } from 'vitepress'
 import { buildSite, clearSite } from './theme/schema-utils/site-builder'
-import fs from "fs"
 import { configure } from './configure'
+import { auth, setServer } from "@cob/rest-api-wrapper"
 
-//  not sure there's a better way to do this
-// TODO Check better way to pass arguments
+if(!process.env.SERVER || !process.env.TOKEN || !process.env.DOMAIN || !process.env.BASE)
+   throw new Error("SERVER, TOKEN, DOMAIN and BASE are mandatory")
 
-const domain = fs.readFileSync("domain", { encoding: 'utf8'})
-const tag    = fs.readFileSync("tag", { encoding: 'utf8'})
+setServer(process.env.SERVER)
+await auth({ token : process.env.TOKEN })
+const domain = process.env.DOMAIN 
+const tag    = process.env.TAG ?? ''
 await clearSite()
 const site = await buildSite(domain, tag)
 
@@ -29,26 +31,27 @@ for(const l of site.localeData.locales)
 
 const index = {}
 const buildIndexTree = (c) => {
-  index[c.current.instanceId] = c.path
-
+  index[c.current.replaces ?? c.current.instanceId] = c.path
+  
   if(c.children)
     c.children.forEach( buildIndexTree )
 }
 
 site.pages.forEach( p => {
-  index[p.instanceId] = p.path
+  index[p.replaces ?? p.instanceId] = p.path
   if(p.content)
     p.content.L1s.forEach( buildIndexTree )
 })
 
 const params = site.pages.reduce( (paramObj, page) => {paramObj[page.path] = page.params ; return paramObj}, {})
-const base = tag == "" ? undefined : `/${tag}/`
+const base = tag == "" ? `/${process.env.BASE}/` : `/${process.env.BASE}/${tag}/`
 
 const baseConfig = {
   title: "Title of Site",
   base: base,
   ignoreDeadLinks: true,
   locales: locales,
+  srcExclude: ['**/README.md'],
   themeConfig: {
     pageParams: params,
     navLayout: site.navbarLayout,
