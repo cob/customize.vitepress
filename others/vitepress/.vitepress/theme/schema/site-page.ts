@@ -8,4 +8,5 @@ export interface SitePage {
     params?: TemplateParameters
     content?: ContentTree
     instanceId: number
+    replaces?: number
 }

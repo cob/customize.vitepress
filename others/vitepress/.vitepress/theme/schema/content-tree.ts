@@ -12,6 +12,7 @@ export interface ContentNode {
 }
 
 export interface Content {
+    replaces?: number
     instanceId: number,
     locales: TextualContent[]
 }

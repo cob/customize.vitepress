@@ -61,9 +61,11 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
     const mains = localeData.locales.map(
         l => ({ params: { 
                     layout: page.layout,
+                    name: page.name,
                     vars: page.params?.[l.code == localeData.defaultLocale.code ? "root" : l.code],
                     path : prefixOf(l.code) + page.path,
-                    children: page.content
+                    children: page.content, 
+                    instance: page.instanceId
                 }
             })
         )
@@ -75,6 +77,8 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
     const under : Page[] = page.content!.L1s.flatMap( c => flatten(c)).map( 
                 c => ({ params: { 
                             files: c.filepaths,
+                            name: c.title,
+                            videos: c.videos,
                             vars: page.params![c.localeCode == localeData.defaultLocale.code ? "root" : c.localeCode],
                             path: prefixOf(c.localeCode) +  c.path,
                             layout: page.content!.layout,
