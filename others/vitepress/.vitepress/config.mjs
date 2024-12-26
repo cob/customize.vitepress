@@ -53,6 +53,7 @@ const baseConfig = {
   locales: locales,
   srcExclude: ['**/README.md'],
   themeConfig: {
+    tag: tag, 
     pageParams: params,
     navLayout: site.navbarLayout,
     footerLayout: site.footerLayout,
