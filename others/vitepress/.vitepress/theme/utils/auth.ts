@@ -1,3 +1,4 @@
+import { ContentFile } from './../schema/textual-content';
 import { rmDefinitionSearch, umLoggedin } from '@cob/rest-api-wrapper';
 import { ref, Ref } from "vue"
 
@@ -33,12 +34,35 @@ export function isSystem(userInfo) {
 
 export { umLoggedin }
 
-const idOfFileField = (hit) => hit._source._definitionInfo.instanceLabel.find( f => f.name == "File" ).id
+const idOfFileField = (hit, name="File") => 
+    name == "File" ?
+      hit._source._definitionInfo.instanceLabel.find( f => f.name == name ).id
+    : hit._source._definitionInfo.instanceDescription.find( f => f.name == name ).id 
 
-export async function filesOf(id: number) : Promise<string[]> {
+
+export async function filesOf(id: number, originalSize=true) : Promise<ContentFile[]> {
+
+    const getFile = (hit) => {
+        if(originalSize || (!hit._source.reduced_file && hit._source.file))
+            return { kind: 'link', file : url(hit._id, idOfFileField(hit), hit._source.file[0]) }
+        else if( hit._source.reduced_file )
+            return { kind : 'link', file : url(hit._id, idOfFileField(hit, "Reduced File"), hit._source.reduced_file[0]) }
+        else if( hit._source.link )
+            return { kind: 'link', file : hit._source.link[0] }
+        else if(hit._source.id_video)
+            return { kind : 'id', file: hit._source.id_video[0] }
+        else 
+            return undefined
+            
+    }
+
+    const url = (id, fieldId, fileName) => {
+        return `/recordm/recordm/instances/${id}/files/${fieldId}/${fileName}`
+    }
+
     const files = await rmDefinitionSearch("LRN Files", `contents:${id}`, 0, 20 )
         .then(r => r.hits.hits)
         .then(hits => hits
-            .map(h => `/recordm/recordm/instances/${h._id}/files/${idOfFileField(h)}/${h._source.file[0]}`));
+            .map(h => getFile(h)));
     return files 
 }

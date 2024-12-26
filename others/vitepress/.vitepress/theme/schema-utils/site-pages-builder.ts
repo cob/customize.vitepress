@@ -1,4 +1,4 @@
-import { TextualContent } from './../schema/textual-content';
+import { ContentFile, TextualContent } from './../schema/textual-content';
 import { Locale } from './../schema/template-parameters';
 import { rmDefinitionSearch } from '@cob/rest-api-wrapper';
 import { THREAD_LIMIT, createIdFromName } from "./shared";
@@ -116,7 +116,6 @@ async function contentsOf(id: number, path: string, tag: string): Promise<Conten
         instance: instance.id,
         path: path,
         filepaths: await filesOf(id),
-        videos: instance.values("Video"),
         restrictions: instance.field("Visibility")?.values("Audience Group") ?? [],
     }
 
@@ -159,7 +158,7 @@ async function contentsOf(id: number, path: string, tag: string): Promise<Conten
             content.instanceId = changeInstance.id             
 
 
-            if (changeInstance.value("File")) common.filepaths = await filesOf(changeInstance.id)
+            common.filepaths = await filesOf(changeInstance.id)
             content.locales = textContentsOf(changeInstance)
                 
             }
@@ -171,11 +170,19 @@ async function contentsOf(id: number, path: string, tag: string): Promise<Conten
 
 const idOfFileField = (hit) => hit._source._definitionInfo.instanceLabel.find( f => f.name == "File" ).id
 
-async function filesOf(id: number) : Promise<string[]> {
+async function filesOf(id: number) : Promise<ContentFile[]> {
     const files = await rmDefinitionSearch("LRN Files", `contents:${id}`, 0, 20 )
         .then(r => r.hits.hits)
         .then(hits => hits
-            .map(h => `/recordm/recordm/instances/${h._id}/files/${idOfFileField(h)}/${h._source.file[0]}`));
+            .map(h => {
+                if(h._source.file)
+                    return { file: `/recordm/recordm/instances/${h._id}/files/${idOfFileField(h)}/${h._source.file[0]}`, kind : 'link' };
+                else if(h._source.link )
+                    return { file: h._source.link[0], kind: 'link' }
+                else if(h._source.id_video) 
+                    return { file: h._source.id_video[0], kind: 'id' }
+            }))  
+                
     return files 
 }
 
@@ -186,7 +193,7 @@ function buildPathLink(field: RmInstanceField, id: number) {
 // TODO make this depend on navbar and footer and other sitepages, so the site is built recursively and only with exactly is necessary
 // Query RecordM to get the ids of all the SitePages to build
 const getIds = (): Promise<number[]> =>
-    rmDefinitionSearch("Site Page", 'development_status:"Published" OR type:New', 0, 500)
+    rmDefinitionSearch("Site Page", 'development_status:"Published" OR (type:New AND -development_status:Inactive)', 0, 500)
         .then(resp => resp.hits.hits)
         .then(hits => hits.map(hit => hit._source.instanceId))
 

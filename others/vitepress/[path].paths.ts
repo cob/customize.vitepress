@@ -78,7 +78,6 @@ function makePages(page: SitePage, localeData : LocaleData, prefixOf : (code: st
                 c => ({ params: { 
                             files: c.filepaths,
                             name: c.title,
-                            videos: c.videos,
                             vars: page.params![c.localeCode == localeData.defaultLocale.code ? "root" : c.localeCode],
                             path: prefixOf(c.localeCode) +  c.path,
                             layout: page.content!.layout,
