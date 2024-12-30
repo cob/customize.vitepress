@@ -17,7 +17,7 @@ if(msg.definitionName == "Site Page" && msg.action == "add" && msg.value("Develo
         def i = 0
         def updates = [
                 "Layout"        : origin.value("Layout") ?: "",
-                "Has Content"   : origin.value("Has Content") ?: "",
+                "Has Content?"   : origin.value("Has Content?") ?: "",
                 "Content Layout": origin.value("Content Layout") ?: "",
                 "Name"          : origin.value("Name") ?: ""
         ]
