@@ -15,15 +15,15 @@ if(msg.definitionName == "Site Page" && msg.value("Development Status") == "In D
 
             def origin = recordm.get(originId).body
 
-            // Duplicate structure
-            def levels = buildSimpleInstance(origin.raw.fields.find({ it.fieldDefinition.name == "Content" }).fields)["Level 1"]
-            def i = 0
-            def updates = [
-                    "Layout"        : origin.value("Layout") ?: "",
-                    "Has Content"   : origin.value("Has Content") ?: "",
-                    "Content Layout": origin.value("Content Layout") ?: "",
-                    "Name"          : origin.value("Name") ?: ""
-            ]
+        // Duplicate structure
+        def levels = buildSimpleInstance(origin.raw.fields.find({ it.fieldDefinition.name == "Content" }).fields)["Level 1"]
+        def i = 0
+        def updates = [
+                "Layout"        : origin.value("Layout") ?: "",
+                "Has Content?"   : origin.value("Has Content?") ?: "",
+                "Content Layout": origin.value("Content Layout") ?: "",
+                "Name"          : origin.value("Name") ?: ""
+        ]
 
             levels.forEach {
                 def ls = buildStructure(1, i, it)

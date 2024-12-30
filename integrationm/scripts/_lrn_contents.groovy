@@ -23,11 +23,17 @@ if(msg.definitionName == "Contents" && msg.value("Development Status") == "In De
 
             recordm.update("LRN Files", "contents:$origin.id", ["Contents[+]" : msg.id])
 
-            recordm.update("Contents", msg.id, [
-                    "Name" : names, "Locale" : locs, "Content" : text, "Tags" : tags,
-                    "Visibility" : visi, "Audience Group" : accessGrs
-            ])
+        def updates = [
+                "Tags" : tags, "Visibility" : visi, "Audience Group" : accessGrs
+        ]
+
+        names.eachWithIndex{ String entry, int i ->
+            updates["Name[$i]"] = entry
+            updates["Name[$i]/Locale"] = locs[i]
+            updates["Name[$i]/Content"] = text[i]
         }
+
+        recordm.update("Contents", msg.id, updates)
     }
 }
 
