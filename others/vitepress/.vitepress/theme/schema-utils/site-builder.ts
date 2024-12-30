@@ -26,7 +26,6 @@ export async function buildSite(domain: string, tag: string, pages: boolean = tr
         .then(resp => resp.hits.hits)
         .then(hits => hits.map(hit => hit._source.instanceId))
 
-
     if (siteIds.length == 0) {
         throw new Error("No site with that domain")
     }
@@ -42,36 +41,36 @@ export async function buildSite(domain: string, tag: string, pages: boolean = tr
     const defaultLoc = site.field("Default Locale")?.label!
     const fallbacks: { [key: string]: string } = {}
     const locales = new Set<string>([defaultLoc!])
-    
-    for (const f of site.fields("Locale")) {
-        if(!f.value()){
-            console.log("WARNING: Undefined locale")
-            continue
-        }
-        
-        const fallback = f.field("Fallback")?.label
-        
-        if(!fallback)
-            throw new Error(`Locale ${f.label} does not have fallback `)
-        
-        fallbacks[f.label] = fallback
-        locales.add(f.label);
-        locales.add(fallback!)
-    }
-    
-    const localeData : LocaleData = {
-        locales: Array.from(locales).map( code => ({ code: code, label: labels[code]})),
-        defaultLocale: { code: defaultLoc, label: labels[defaultLoc]},
-        fallbacks: fallbacks,
-        
-    }
-    
-    const homeId = site.valueAsNumber("Home Page")!
-    const builtPages =  pages ? await buildSitePages(tag, localeData, homeId) : []
+            
+            for (const f of site.fields("Locale")) {
+                if(!f.value()){
+                    console.log("WARNING: Undefined locale")
+                    continue
+                }
+                
+                const fallback = f.field("Fallback")?.label
+                
+                if(!fallback)
+                    throw new Error(`Locale ${f.label} does not have fallback `)
+                
+                fallbacks[f.label] = fallback
+                locales.add(f.label);
+                locales.add(fallback!)
+            }
+            
+            const localeData : LocaleData = {
+                locales: Array.from(locales).map( code => ({ code: code, label: labels[code]})),
+                defaultLocale: { code: defaultLoc, label: labels[defaultLoc]},
+                fallbacks: fallbacks,
+                
+            }
+            
+            const homeId = site.valueAsNumber("Home Page")!
+            const builtPages =  pages ? await buildSitePages(tag, localeData, homeId) : []
 
-    const sidebar = {}
+            const sidebar = {}
 
-    for(const loc of localeData.locales)
+            for(const loc of localeData.locales)
         sidebar[loc.code] = buildSidebar( builtPages, loc.code, loc.code == defaultLoc ? "/" : `/${loc.code}/`)
 
     const params = await buildTemplates(site, localeData)

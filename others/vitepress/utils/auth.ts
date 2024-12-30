@@ -40,6 +40,5 @@ export async function filesOf(id: number) : Promise<string[]> {
         .then(r => r.hits.hits)
         .then(hits => hits
             .map(h => `/recordm/recordm/instances/${h._id}/files/${idOfFileField(h)}/${h._source.file[0]}`));
-    console.log("FILES", files)
     return files 
 }

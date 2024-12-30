@@ -14,7 +14,6 @@ if(!window.mdrenderer)
 const rendered = ref('')
 
 watch(props, () => {
-    console.log(props.raw)
     window.mdrenderer.then( re => rendered.value = props.inline ? re.renderInline(props.raw) : re.render( props.raw ))
 })
 window.mdrenderer.then( re => rendered.value = props.inline ? re.renderInline(props.raw) : re.render( props.raw ))

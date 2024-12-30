@@ -327,6 +327,5 @@ export const createMarkdownRenderer = async (
     options.config(md)
   }
 
-  console.log(md)
   return md
 }

@@ -27,7 +27,6 @@ async function instanceToPage(rmi: RmInstance, tag: string, locData: LocaleData,
     
     if(tag) {
         const alternativeSearch = (await rmDefinitionSearch("Site Page", `origin:${rmi.id} changes_reference:"${tag}"`, 0, 1000)).hits
-        console.log(alternativeSearch)
         if(alternativeSearch.total.value > 0) {
             replaces = rmi.id
             rmi = await RmInstance.load(alternativeSearch.hits[0]._id)
@@ -151,7 +150,6 @@ async function contentsOf(id: number, path: string, tag: string): Promise<Conten
 
         const individualChanges = await rmDefinitionSearch("Contents", `changes:${change._id} origin:${id}`, 0, 200)
 
-        console.log(individualChanges)
         if (individualChanges.hits.total.value > 0) {
             const changeInstance = await RmInstance.load(individualChanges.hits.hits[0]._id)
             content.replaces = content.instanceId
@@ -203,7 +201,5 @@ export async function buildSitePages(tag: string, locData: LocaleData, homeId: n
     const ids = await getIds();
     const instances: RmInstance[] = await sendRequests(ids.map(id => () => RmInstance.load(id)))
     const pages: SitePage[] = await Promise.all(instances.map(rmi => instanceToPage(rmi, tag, locData, rmi.id == homeId)))
-    console.log(pages)
-    console.log(pages.filter( p => p.content).map( p => p.content?.L1s))
     return pages
 }
