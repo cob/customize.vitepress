@@ -1,45 +1,61 @@
+import com.cultofbits.integrationm.service.dictionary.recordm.RecordmMsg
 
 if(msg.definitionName == "Site Page" && msg.value("Development Status") == "In Development") {
-    def changesInstance = msg.value("Changes", Integer) as Integer
-    if(changesInstance)
-        recordm.update("Changes", changesInstance, ["Estado Deploy" : "", "Estado Index" : ""])
-}
+    
+    if(relevantFieldsChanges(msg)) {
+        def changesInstance = msg.value("Changes", Integer) as Integer
+        if(changesInstance)
+            recordm.update("Changes", changesInstance, ["Estado Deploy" : "", "Estado Index" : ""])
+    }   
 
-if(msg.definitionName == "Site Page" && msg.action == "add" && msg.value("Development Status") == "In Development") {
+    if(msg.action == "add") {
 
-    def originId = msg.value("Origin")
-    if(originId != null) {
+        def originId = msg.value("Origin")
+        if(originId != null) {
 
-        def origin = recordm.get(originId).body
+            def origin = recordm.get(originId).body
 
-        // Duplicate structure
-        def levels = buildSimpleInstance(origin.raw.fields.find({ it.fieldDefinition.name == "Content" }).fields)["Level 1"]
-        def i = 0
-        def updates = [
-                "Layout"        : origin.value("Layout") ?: "",
-                "Has Content?"   : origin.value("Has Content?") ?: "",
-                "Content Layout": origin.value("Content Layout") ?: "",
-                "Name"          : origin.value("Name") ?: ""
-        ]
-
-        levels.forEach {
-            def ls = buildStructure(1, i, it)
-            ls.forEach { u -> updates[u[0]] = u[1] }
-            i++
-        }
-
-        recordm.update("Site Page", msg.id, updates)
-
-        // Duplicate parameters
-        def fields = ["Locale", "Group", "Group Order", "Name", "Parameter Order", "Type", "Value"]
-        recordm.search("Layout Parameters", "page:${origin.id}").hits.forEach {
-            def copiedParam = [
-                    "Page": msg.id,
+            // Duplicate structure
+            def levels = buildSimpleInstance(origin.raw.fields.find({ it.fieldDefinition.name == "Content" }).fields)["Level 1"]
+            def i = 0
+            def updates = [
+                    "Layout"        : origin.value("Layout") ?: "",
+                    "Has Content"   : origin.value("Has Content") ?: "",
+                    "Content Layout": origin.value("Content Layout") ?: "",
+                    "Name"          : origin.value("Name") ?: ""
             ]
-            fields.forEach { f -> copiedParam[f] = it.value(f) }
-            recordm.create("Layout Parameters", copiedParam)
+
+            levels.forEach {
+                def ls = buildStructure(1, i, it)
+                ls.forEach { u -> updates[u[0]] = u[1] }
+                i++
+            }
+
+            recordm.update("Site Page", msg.id, updates)
+
+            // Duplicate parameters
+            def fields = ["Locale", "Group", "Group Order", "Name", "Parameter Order", "Type", "Value"]
+            recordm.search("Layout Parameters", "page:${origin.id}").hits.forEach {
+                def copiedParam = [
+                        "Page": msg.id,
+                ]
+                fields.forEach { f -> copiedParam[f] = it.value(f) }
+                recordm.create("Layout Parameters", copiedParam)
+            }
         }
     }
+}
+
+
+static def relevantFieldsChanges(RecordmMsg msg) {
+    return msg.field("Name").changed() ||
+            msg.field("Layout").changed() ||
+            msg.field("Development Status").changed() ||
+            msg.field("Content Layout").changed() ||
+            msg.field("Level 1").changed() ||
+            msg.field("Level 2").changed() ||
+            msg.field("Level 3").changed() ||
+            msg.field("Level 4").changed() ||
 }
 
 
